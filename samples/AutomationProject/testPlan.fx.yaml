@@ -1,0 +1,25 @@
+testSuite:
+  testSuiteName: Automation Project Test kotesh
+  testSuiteDescription: Verifies that you can interact with controls in a Automation project app
+  persona: User1
+  appId: 86f0c1aa-e10c-4a6e-a226-974b46cb1f3a
+
+  testCases:
+    - testCaseName: Case1
+      testSteps: |
+        = SetProperty(CK_SearchBoxProjectName.SearchText, "Kotesh");
+          Assert(CK_SearchBoxProjectName.SearchText = "Kotesh", "Search String is not updated");
+          Select(ProjectCommandBar);         
+          Select(AddEditProjectPanel.Buttons,0);
+          
+testSettings:
+  locale: "en-US"
+  recordVideo: true
+  browserConfigurations:
+    - browser: Chromium
+
+environmentVariables:
+  users:
+    - personaName: User1
+      emailKey: user1Email
+      passwordKey: user1Password

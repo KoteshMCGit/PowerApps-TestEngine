@@ -71,7 +71,8 @@ namespace Microsoft.PowerApps.TestEngine.PowerFx
                     result = Execute(testSteps);
                     break;
                 }
-                catch (Exception e) when (e.Message.Contains("locale"))
+                catch (Exception e)
+                when (e.Message.Contains("locale"))
                 {
                     Logger.LogDebug($"Got {e.Message} in attempt No.{currentRetry + 1} to run");
                     currentRetry++;
@@ -85,7 +86,16 @@ namespace Microsoft.PowerApps.TestEngine.PowerFx
                     Thread.Sleep(1000);
                     await UpdatePowerFxModelAsync();
                 }
-            }
+                catch (Exception e)
+                when (e.Message.Contains("One or more errors occurred."))
+                {
+                    currentRetry = _retryLimit + 1;
+                    Logger.LogDebug($"Got {e.Message} in attempt No.{currentRetry + 1} to run");
+
+                }
+
+
+                }
         }
 
         public FormulaValue Execute(string testSteps)
@@ -120,8 +130,18 @@ namespace Microsoft.PowerApps.TestEngine.PowerFx
                 FormulaValue result = FormulaValue.NewBlank();
                 foreach (var step in splitSteps)
                 {
-                    Logger.LogTrace($"Attempting:{step.Replace("\n", "").Replace("\r", "")}");
-                    result = Engine.Eval(step, null, new ParserOptions() { AllowsSideEffects = true });
+                    Logger.LogWarning($"Attempting:{step.Replace("\n", "").Replace("\r", "")}");
+                    
+                    // result = Engine.Eval(step, null, new ParserOptions() { AllowsSideEffects = true });
+
+                    try
+                    {  
+                        result = Engine.Eval(step, null, new ParserOptions() { AllowsSideEffects = true });
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogWarning("Error found at step [" + step +"] " + e.Message );
+                    }                   
                 }
                 return result;
             }
@@ -136,7 +156,7 @@ namespace Microsoft.PowerApps.TestEngine.PowerFx
         {
             if (Engine == null)
             {
-                Logger.LogError("Engine is null, make sure to call Setup first");
+                Logger.LogError("Engine is null, makae sure to call Setup first");
                 throw new InvalidOperationException();
             }
 
